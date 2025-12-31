@@ -8,7 +8,7 @@ const navbar = () => {
         <ul className='flex gap-5 mr-15 uppercase text-black '>
             <li><a href="" className=' text-[16px] hover:text-[18px]'>about</a></li>
             <li><a href="" className=' text-[16px] hover:text-[18px]'>servises</a></li>
-            <li><a href="" className=' text-[16px] hover:text-[18px]'>project1</a></li>
+            <li><a href="" className=' text-[16px] hover:text-[18px]'>project</a></li>
             <li> <House /> </li>
             
         </ul>
