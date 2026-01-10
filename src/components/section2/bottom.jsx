@@ -3,7 +3,7 @@ import { Globe,Store,Tv  } from 'lucide-react';
 
 const bottom = () => {
   return (  
-    <div className=' h-1/2 w-full  py-5 px-10 flex gap-10'>
+    <div className=' h-1/2 w-full  py-5 px-10 flex gap-10 '>
         <div className='h-full w-1/4 rounded-3xl flex flex-col items-center pt-15'>
         <Globe className='h-20 w-20' />
         <div className=' flex flex-col justify-center items-center gap-3'>
