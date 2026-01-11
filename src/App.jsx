@@ -6,12 +6,14 @@ import React from 'react'
 import Home from './pages/Home'
 import { Route, Routes } from 'react-router-dom'
 import About from './pages/About'
+import M404 from './pages/404'
 const App = () => {
   return (
     <div>
       <Routes>
         <Route path='/' element={<Home/>} />
         <Route path='/about' element={<About/>} />
+        <Route path='*' element={<M404/>} />
       </Routes>
     </div>
   )
