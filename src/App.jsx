@@ -7,12 +7,14 @@ import Home from './pages/Home'
 import { Route, Routes } from 'react-router-dom'
 import About from './pages/About'
 import M404 from './pages/404'
+import LoginSignupPage from './pages/LoginSignupPage'
 const App = () => {
   return (
     <div>
       <Routes>
         <Route path='/' element={<Home/>} />
         <Route path='/about' element={<About/>} />
+        <Route path='/login' element={<LoginSignupPage/>} />
         <Route path='*' element={<M404/>} />
       </Routes>
     </div>
