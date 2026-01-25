@@ -8,6 +8,8 @@ import { Route, Routes } from 'react-router-dom'
 import About from './pages/About'
 import M404 from './pages/404'
 import LoginSignupPage from './pages/LoginSignupPage'
+import Project from './pages/project'
+
 const App = () => {
   return (
     <div>
@@ -15,6 +17,7 @@ const App = () => {
         <Route path='/' element={<Home/>} />
         <Route path='/about' element={<About/>} />
         <Route path='/login' element={<LoginSignupPage/>} />
+        <Route path='/project' element={<Project />} />
         <Route path='*' element={<M404/>} />
       </Routes>
     </div>
