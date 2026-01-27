@@ -8,17 +8,25 @@ import {
   User,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { tokenvfy } from "../../api/token.ck";
 
 const Navbar = ({ className = "", buttonbg = "" }) => {
   const [dotvis, setdotvis] = useState(false);
   const [islodin, setislodin] = useState(false);
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-    if (!token) {
-      return setislodin(false);
-    }
-    return setislodin(true);
-  });
+    const fn = async () => {
+      const res =await tokenvfy(token);
+
+      if (!token) {
+        return setislodin(false);
+      }
+      if (res.data?.bolien) {
+        return setislodin(res.data.bolien);
+      } else return setislodin(false);
+    };
+    fn()
+  }, []);
 
   return (
     <div className="h-1/12 w-full py-1 px-4 flex items-center justify-between d22335">

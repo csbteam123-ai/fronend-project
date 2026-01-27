@@ -79,7 +79,6 @@ const Project = () => {
   const filteredProjects = filter === 'all' 
     ? projects 
     : projects.filter(project => project.category === filter);
-    console.log(filteredProjects )
 
   // Category data for filters
   const categories = [

@@ -1,5 +1,5 @@
 // pages/ServicePage.jsx - Web Development Service Page
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   Code, 
   Palette, 
@@ -16,8 +16,23 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/section1/Navbar';
+import { tokenvfy } from '../api/token.ck';
 
 const ServicePage = () => {
+  useEffect(()=>{
+    const token = sessionStorage.getItem("token")
+    const fn = async ()=>{
+      const res = await tokenvfy(token)
+      // console.log(res) 
+    }
+    fn()
+  },[])
+
+
+
+
+
+
   const services = [
     {
       icon: <Code className="w-10 h-10" />,

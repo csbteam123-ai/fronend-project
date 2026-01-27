@@ -9,6 +9,7 @@ import About from './pages/About'
 import M404 from './pages/404'
 import LoginSignupPage from './pages/LoginSignupPage'
 import Project from './pages/project'
+import Tokenverify from "./token/tokenverify"
 
 const App = () => {
   return (
@@ -17,7 +18,7 @@ const App = () => {
         <Route path='/' element={<Home/>} />
         <Route path='/about' element={<About/>} />
         <Route path='/login' element={<LoginSignupPage/>} />
-        <Route path='/project' element={<Project />} />
+        <Route path='/project' element={<Tokenverify children={<Project />} />} />
         <Route path='*' element={<M404/>} />
       </Routes>
     </div>
