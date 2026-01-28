@@ -4,6 +4,7 @@ import React from 'react'
 // import Section3 from './components/section3/section3'
 // import Section4 from './components/section4/Section4'
 import Home from './pages/Home'
+//main page route
 import { Route, Routes } from 'react-router-dom'
 import About from './pages/About'
 import M404 from './pages/404'
