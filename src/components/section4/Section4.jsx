@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle, MessageSquare, X, Menu } from 'lucide-react'
+import { sender } from '../../api/contact.mail'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,11 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
+    const {name,email,phone,subject,message} = formData
+
+    const res = await sender(name,email,phone,subject,message)
+    console.log(formData)
+    console.log(res)
     
     // Simulate API call
     setTimeout(() => {
