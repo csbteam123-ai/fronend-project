@@ -1,12 +1,12 @@
 import axios from "axios"
 
-export const sender = (fullname,mail,phone,subject,msg) => {
+export const sender = (name,mail,phone,subject,message) => {
     return axios.post(`${import.meta.env.VITE_BACKEND_API}api/contact/send/mail`,{
-        fullname,
+        fullname:name,
         email:mail,
         phone,
         subject,
-        msg
+        message
         
     })
 }
