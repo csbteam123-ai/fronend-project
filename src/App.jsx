@@ -13,6 +13,7 @@ import Project from './pages/project'
 import Tokenverify from "./token/tokenverify"
 import Tokenlogin from './token/Tokenlogin'
 import ServicesPage from './pages/Services'
+import Admin from "./pages/admin"
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
         <Route path='/login' element={<Tokenlogin login_page={<LoginSignupPage/>}/>} />
         <Route path='/project' element={<Tokenverify children={<Project />} />} />
         <Route path='/services_all' element={<ServicesPage />} />
+        <Route path='/admin' element={<Admin/>} />
         <Route path='*' element={<M404/>} />
       </Routes>
     </div>
