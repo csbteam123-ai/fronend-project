@@ -10,13 +10,13 @@ import {
 import { Link } from "react-router-dom";
 import { tokenvfy } from "../../api/token.ck";
 
-const Navbar = ({ className = "", buttonbg = "" }) => {
+const Navbar = ({ className = "", buttonbg = "", mobile_btn_col = "" }) => {
   const [dotvis, setdotvis] = useState(false);
   const [islodin, setislodin] = useState(false);
   useEffect(() => {
     const token = sessionStorage.getItem("token");
     const fn = async () => {
-      const res =await tokenvfy(token);
+      const res = await tokenvfy(token);
 
       if (!token) {
         return setislodin(false);
@@ -25,7 +25,7 @@ const Navbar = ({ className = "", buttonbg = "" }) => {
         return setislodin(res.data.bolien);
       } else return setislodin(false);
     };
-    fn()
+    fn();
   }, []);
 
   return (
@@ -44,6 +44,7 @@ const Navbar = ({ className = "", buttonbg = "" }) => {
             dotvis ? "max-[639px]:hidden" : "max-[639px]:block"
           }`}
           onClick={() => setdotvis(true)}
+          color={mobile_btn_col || "black"}
         />
       </div>
 

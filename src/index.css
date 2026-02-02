@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* scrollbar hide */
+::-webkit-scrollbar {
+  display: none;
+}
+
+
 @media (max-width: 639px) {
   .b22335 {
     margin-left: 6px;

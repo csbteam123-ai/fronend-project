@@ -90,9 +90,9 @@ const Project = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans">
+    <div className="min-h-screen bg-black text-white font-sans py-5">
       {/* Navigation */}
-      <Navbar className=" text-white " buttonbg="bg-white text-black"/>
+      <Navbar className=" text-white " buttonbg="bg-white text-black" mobile_btn_col="white"/>
       
       {/* Main Content */}
       <main className="pt-24 pb-16">
