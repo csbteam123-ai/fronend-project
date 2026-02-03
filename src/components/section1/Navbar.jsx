@@ -77,11 +77,6 @@ const Navbar = ({ className = "", buttonbg = "", mobile_btn_col = "" }) => {
             project
           </Link>
         </li>
-        <li>
-          <Link to="/admin" className="text-[16px] hover:text-[18px]">
-            admin
-          </Link>
-        </li>
 
         <li>
           <Link to={islodin ? "/about" : "/login"}>

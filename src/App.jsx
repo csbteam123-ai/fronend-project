@@ -24,7 +24,7 @@ const App = () => {
         <Route path='/login' element={<Tokenlogin login_page={<LoginSignupPage/>}/>} />
         <Route path='/project' element={<Tokenverify children={<Project />} />} />
         <Route path='/services_all' element={<ServicesPage />} />
-        <Route path='/admin' element={<Admin/>} />
+        <Route path='/admin' element={<Tokenverify isadmin={true} children={<Admin />} />} />
         <Route path='*' element={<M404/>} />
       </Routes>
     </div>

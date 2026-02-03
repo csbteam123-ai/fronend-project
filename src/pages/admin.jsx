@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { allUserSee, userUpdate, userDelete } from "../api/admin.user.see";
+import { createservises } from "../api/servises.api";
 
 const AdminPanel = () => {
   // State for users
@@ -76,6 +77,7 @@ const AdminPanel = () => {
     priceType: "project",
     popular: false,
   });
+  const token = sessionStorage.getItem("token");
 
   const [udereditid, setudereditid] = useState(null);
 
@@ -112,8 +114,13 @@ const AdminPanel = () => {
 
     if (editingUserId) {
       // Update existing user
-      const res = await userUpdate(udereditid,newUser)
-      console.log(res)
+      const res = await userUpdate(udereditid, newUser);
+      console.log(res);
+      setUsers(
+        users.map((user) =>
+          user._id === udereditid ? { ...user, ...newUser } : user,
+        ),
+      );
       setEditingUserId(null);
     } else {
       // Add new user
@@ -127,7 +134,7 @@ const AdminPanel = () => {
   };
 
   // Handle service form submission
-  const handleServiceSubmit = (e) => {
+  const handleServiceSubmit = async (e) => {
     e.preventDefault();
 
     if (editingServiceId) {
@@ -141,10 +148,8 @@ const AdminPanel = () => {
       );
       setEditingServiceId(null);
     } else {
-      // Add new service
-      const newId =
-        services.length > 0 ? Math.max(...services.map((s) => s.id)) + 1 : 1;
-      setServices([...services, { ...newService, id: newId }]);
+      const res = await createservises(token, newService);
+      console.log(res);
     }
 
     // Reset form
