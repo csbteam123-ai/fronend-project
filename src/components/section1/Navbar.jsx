@@ -79,7 +79,7 @@ const Navbar = ({ className = "", buttonbg = "", mobile_btn_col = "" }) => {
         </li>
 
         <li>
-          <Link to={islodin ? "/about" : "/login"}>
+          <Link to={islodin ? "/dasbord" : "/login"}>
             {islodin ? <LayoutDashboard /> : <UserPlus />}
           </Link>
         </li>
