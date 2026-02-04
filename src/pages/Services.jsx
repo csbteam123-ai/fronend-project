@@ -1,54 +1,24 @@
 import React, { useState } from 'react';
 import Navbar from '../components/section1/Navbar';
+import { useEffect } from 'react';
+import { getAllServises } from '../api/servises.api';
 
 // Service data in array format for future scalability
-const servicesData = [
-  {
-    id: 1,
-    title: "Web Development",
-    description: "Custom web applications and responsive websites built with modern technologies like React, Node.js, and MongoDB.",
-    features: [
-      "Responsive Design",
-      "Frontend & Backend Development",
-      "API Integration",
-      "Performance Optimization"
-    ],
-    price: 999,
-    priceType: "project",
-    popular: true
-  },
-  {
-    id: 2,
-    title: "Digital Marketing",
-    description: "Comprehensive digital marketing strategies to boost your online presence and drive conversions.",
-    features: [
-      "SEO Optimization",
-      "Social Media Marketing",
-      "Content Strategy",
-      "Analytics & Reporting"
-    ],
-    price: 499,
-    priceType: "monthly",
-    popular: false
-  },
-  {
-    id: 3,
-    title: "Graphic Design",
-    description: "Creative visual solutions including logos, branding materials, and marketing collateral.",
-    features: [
-      "Logo & Brand Identity",
-      "Marketing Materials",
-      "UI/UX Design",
-      "Print Design"
-    ],
-    price: 299,
-    priceType: "project",
-    popular: false
-  }
-];
 
 const ServicesPage = () => {
   const [selectedService, setSelectedService] = useState(null);
+  const [servicesData, setservicesData] = useState([])
+
+  async function fetchAllServises() {
+    const all_servises = await getAllServises();
+    console.log(all_servises);
+    setservicesData(all_servises.data.data);
+  }
+
+
+  useEffect(() => {
+    fetchAllServises();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-gray-900 py-5">

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { allUserSee, userUpdate, userDelete } from "../api/admin.user.see";
-import { createservises } from "../api/servises.api";
+import {
+  createservises,
+  getAllServises,
+  updateservises,
+} from "../api/servises.api";
 
 const AdminPanel = () => {
   // State for users
@@ -10,57 +14,17 @@ const AdminPanel = () => {
     console.log(all_user);
     setUsers(all_user.data.data);
   }
+  async function fetchAllServises() {
+    const all_servises = await getAllServises();
+    console.log(all_servises);
+    setServices(all_servises.data.data);
+  }
   useEffect(() => {
     fetchAllUser();
+    fetchAllServises();
   }, []);
   // State for services
-  const [services, setServices] = useState([
-    {
-      id: 1,
-      title: "Web Development",
-      description:
-        "Custom web applications and responsive websites built with modern technologies like React, Node.js, and MongoDB.",
-      features: [
-        "Responsive Design",
-        "Frontend & Backend Development",
-        "API Integration",
-        "Performance Optimization",
-      ],
-      price: 999,
-      priceType: "project",
-      popular: true,
-    },
-    {
-      id: 2,
-      title: "Mobile App Development",
-      description:
-        "Native and cross-platform mobile applications for iOS and Android.",
-      features: [
-        "iOS & Android Development",
-        "React Native",
-        "App Store Deployment",
-        "Push Notifications",
-      ],
-      price: 1499,
-      priceType: "project",
-      popular: true,
-    },
-    {
-      id: 3,
-      title: "UI/UX Design",
-      description:
-        "Beautiful and user-friendly interface designs for web and mobile applications.",
-      features: [
-        "Wireframing & Prototyping",
-        "User Research",
-        "Visual Design",
-        "Design Systems",
-      ],
-      price: 799,
-      priceType: "project",
-      popular: false,
-    },
-  ]);
+  const [services, setServices] = useState([]);
 
   // State for form inputs
   const [newUser, setNewUser] = useState({
@@ -83,7 +47,7 @@ const AdminPanel = () => {
 
   // State for editing
   const [editingUserId, setEditingUserId] = useState(null);
-  const [editingServiceId, setEditingServiceId] = useState(null);
+  const [editingServiceId, setEditingServiceId] = useState(false);
 
   // State for active tab
   const [activeTab, setActiveTab] = useState("users");
@@ -93,6 +57,9 @@ const AdminPanel = () => {
 
   // State for sidebar
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // State for mobile menu
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Filter users based on search
   const filteredUsers = users.filter(
@@ -138,15 +105,16 @@ const AdminPanel = () => {
     e.preventDefault();
 
     if (editingServiceId) {
-      // Update existing service
+      const res = await updateservises(token, servisesupid, newService);
+      console.log(res);
       setServices(
         services.map((service) =>
-          service.id === editingServiceId
-            ? { ...newService, id: editingServiceId }
+          servisesupid === service._id
+            ? { ...newService, _id: servisesupid }
             : service,
         ),
       );
-      setEditingServiceId(null);
+      setEditingServiceId(false);
     } else {
       const res = await createservises(token, newService);
       console.log(res);
@@ -171,9 +139,11 @@ const AdminPanel = () => {
   };
 
   // Edit service
+  const [servisesupid, setservisesupid] = useState(null);
   const handleEditService = (service) => {
     setNewService(service);
-    setEditingServiceId(service.id);
+    setservisesupid(service._id);
+    setEditingServiceId(true);
   };
 
   // Delete user
@@ -223,9 +193,30 @@ const AdminPanel = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      {/* Mobile Menu Button */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-md"
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          ></path>
+        </svg>
+      </button>
+
       {/* Sidebar */}
       <div
-        className={`${sidebarOpen ? "w-64" : "w-20"} bg-gray-800 text-white transition-all duration-300`}
+        className={`${sidebarOpen ? "w-64" : "w-20"} bg-gray-800 text-white transition-all duration-300 fixed md:relative h-full z-40 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         <div className="p-4 flex items-center justify-between">
           <h1
@@ -235,9 +226,15 @@ const AdminPanel = () => {
           </h1>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-md bg-gray-700 hover:bg-gray-600"
+            className="p-2 rounded-md bg-gray-700 hover:bg-gray-600 hidden md:block"
           >
             {sidebarOpen ? "«" : "»"}
+          </button>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="md:hidden p-2 rounded-md bg-gray-700 hover:bg-gray-600"
+          >
+            ✕
           </button>
         </div>
 
@@ -245,7 +242,10 @@ const AdminPanel = () => {
           <ul>
             <li>
               <button
-                onClick={() => setActiveTab("users")}
+                onClick={() => {
+                  setActiveTab("users");
+                  setMobileMenuOpen(false);
+                }}
                 className={`w-full text-left py-3 px-4 flex items-center ${activeTab === "users" ? "bg-gray-900" : "hover:bg-gray-700"}`}
               >
                 <svg
@@ -269,7 +269,10 @@ const AdminPanel = () => {
             </li>
             <li>
               <button
-                onClick={() => setActiveTab("services")}
+                onClick={() => {
+                  setActiveTab("services");
+                  setMobileMenuOpen(false);
+                }}
                 className={`w-full text-left py-3 px-4 flex items-center ${activeTab === "services" ? "bg-gray-900" : "hover:bg-gray-700"}`}
               >
                 <svg
@@ -293,7 +296,10 @@ const AdminPanel = () => {
             </li>
             <li>
               <button
-                onClick={() => setActiveTab("dashboard")}
+                onClick={() => {
+                  setActiveTab("dashboard");
+                  setMobileMenuOpen(false);
+                }}
                 className={`w-full text-left py-3 px-4 flex items-center ${activeTab === "dashboard" ? "bg-gray-900" : "hover:bg-gray-700"}`}
               >
                 <svg
@@ -319,21 +325,31 @@ const AdminPanel = () => {
         </nav>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <header className="bg-white shadow p-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800 capitalize">
-            {activeTab === "users" && "User Management"}
-            {activeTab === "services" && "Services Management"}
-            {activeTab === "dashboard" && "Dashboard"}
-          </h2>
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
+      )}
 
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto md:ml-0">
+        <header className="bg-white shadow p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="w-full flex justify-between items-center">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 capitalize">
+              {activeTab === "users" && "User Management"}
+              {activeTab === "services" && "Services Management"}
+              {activeTab === "dashboard" && "Dashboard"}
+            </h2>
+          </div>
+
+          <div className="flex flex-col md:flex-row items-stretch md:items-center w-full md:w-auto gap-4">
+            <div className="relative w-full md:w-auto">
               <input
                 type="text"
                 placeholder="Search..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -353,62 +369,68 @@ const AdminPanel = () => {
               </svg>
             </div>
 
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full md:w-auto">
               Logout
             </button>
           </div>
         </header>
 
-        <main className="p-6">
+        <main className="p-3 md:p-6">
           {/* Dashboard Tab */}
           {activeTab === "dashboard" && (
             <div>
-              <h3 className="text-xl font-semibold mb-6">
+              <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6">
                 Admin Dashboard Overview
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h4 className="text-lg font-medium text-gray-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+                <div className="bg-white p-4 md:p-6 rounded-lg shadow">
+                  <h4 className="text-base md:text-lg font-medium text-gray-700">
                     Total Users
                   </h4>
-                  <p className="text-3xl font-bold text-blue-600 mt-2">
+                  <p className="text-2xl md:text-3xl font-bold text-blue-600 mt-1 md:mt-2">
                     {users.length}
                   </p>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h4 className="text-lg font-medium text-gray-700">
+                <div className="bg-white p-4 md:p-6 rounded-lg shadow">
+                  <h4 className="text-base md:text-lg font-medium text-gray-700">
                     Total Services
                   </h4>
-                  <p className="text-3xl font-bold text-green-600 mt-2">
+                  <p className="text-2xl md:text-3xl font-bold text-green-600 mt-1 md:mt-2">
                     {services.length}
                   </p>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h4 className="text-lg font-medium text-gray-700">
+                <div className="bg-white p-4 md:p-6 rounded-lg shadow">
+                  <h4 className="text-base md:text-lg font-medium text-gray-700">
                     Popular Services
                   </h4>
-                  <p className="text-3xl font-bold text-purple-600 mt-2">
+                  <p className="text-2xl md:text-3xl font-bold text-purple-600 mt-1 md:mt-2">
                     {services.filter((s) => s.popular).length}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h4 className="text-lg font-medium text-gray-700 mb-4">
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow">
+                <h4 className="text-base md:text-lg font-medium text-gray-700 mb-3 md:mb-4">
                   Recent Activities
                 </h4>
-                <ul className="space-y-3">
+                <ul className="space-y-2 md:space-y-3">
                   <li className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                    <span>User "John Doe" was added</span>
+                    <div className="w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full mr-2 md:mr-3"></div>
+                    <span className="text-sm md:text-base">
+                      User "John Doe" was added
+                    </span>
                   </li>
                   <li className="flex items-center">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-                    <span>Service "Web Development" was updated</span>
+                    <div className="w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full mr-2 md:mr-3"></div>
+                    <span className="text-sm md:text-base">
+                      Service "Web Development" was updated
+                    </span>
                   </li>
                   <li className="flex items-center">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-                    <span>User "Bob Johnson" was edited</span>
+                    <div className="w-2 h-2 md:w-3 md:h-3 bg-yellow-500 rounded-full mr-2 md:mr-3"></div>
+                    <span className="text-sm md:text-base">
+                      User "Bob Johnson" was edited
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -417,23 +439,23 @@ const AdminPanel = () => {
 
           {/* Users Tab */}
           {activeTab === "users" && (
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8">
               {/* User Form */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-xl font-semibold mb-4">
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow">
+                <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">
                   {editingUserId ? "Edit User" : "Create New User"}
                 </h3>
                 <form
                   onSubmit={handleUserSubmit}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"
                 >
-                  <div>
+                  <div className="md:col-span-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Name
                     </label>
                     <input
                       type="text"
-                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-2 text-sm md:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={newUser.name}
                       onChange={(e) =>
                         setNewUser({ ...newUser, name: e.target.value })
@@ -441,13 +463,13 @@ const AdminPanel = () => {
                       required
                     />
                   </div>
-                  <div>
+                  <div className="md:col-span-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Email
                     </label>
                     <input
                       type="email"
-                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-2 text-sm md:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={newUser.email}
                       onChange={(e) =>
                         setNewUser({ ...newUser, email: e.target.value })
@@ -455,12 +477,12 @@ const AdminPanel = () => {
                       required
                     />
                   </div>
-                  <div>
+                  <div className="md:col-span-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1 w-full">
                       Role
                     </label>
                     <select
-                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-2 text-sm md:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={newUser.role}
                       onChange={(e) =>
                         setNewUser({ ...newUser, role: e.target.value })
@@ -471,10 +493,10 @@ const AdminPanel = () => {
                     </select>
                   </div>
 
-                  <div className="md:col-span-2">
+                  <div className="md:col-span-2 flex flex-col sm:flex-row gap-2">
                     <button
                       type="submit"
-                      className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="bg-blue-600 text-white px-4 md:px-6 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                     >
                       {editingUserId ? "Update User" : "Create User"}
                     </button>
@@ -490,7 +512,7 @@ const AdminPanel = () => {
                             status: "Active",
                           });
                         }}
-                        className="ml-4 bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400"
+                        className="bg-gray-300 text-gray-700 px-4 md:px-6 py-2 rounded hover:bg-gray-400 text-sm md:text-base"
                       >
                         Cancel
                       </button>
@@ -500,28 +522,28 @@ const AdminPanel = () => {
               </div>
 
               {/* Users List */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-xl font-semibold mb-4">
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow">
+                <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">
                   All Users ({filteredUsers.length})
                 </h3>
                 {filteredUsers.length > 0 ? (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto -mx-4 md:mx-0">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             ID
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Name
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                             Email
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Role
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Actions
                           </th>
                         </tr>
@@ -529,16 +551,16 @@ const AdminPanel = () => {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {filteredUsers.map((user, index) => (
                           <tr key={user._id + index}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {user._id}
+                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm">
+                              {user._id.substring(0, 6)}...
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap font-medium">
+                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap font-medium text-sm">
                               {user.name}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm hidden md:table-cell">
                               {user.email}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                               <span
                                 className={`px-2 py-1 text-xs rounded-full ${
                                   user.role === "Admin"
@@ -552,10 +574,10 @@ const AdminPanel = () => {
                               </span>
                             </td>
 
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-medium">
                               <button
                                 onClick={() => handleEditUser(user)}
-                                className="text-blue-600 hover:text-blue-900 mr-4"
+                                className="text-blue-600 hover:text-blue-900 mr-2 md:mr-4"
                               >
                                 Edit
                               </button>
@@ -572,7 +594,7 @@ const AdminPanel = () => {
                     </table>
                   </div>
                 ) : (
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 text-sm md:text-base">
                     No users found. Try a different search term or create a new
                     user.
                   </p>
@@ -583,21 +605,24 @@ const AdminPanel = () => {
 
           {/* Services Tab */}
           {activeTab === "services" && (
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8">
               {/* Service Form */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-xl font-semibold mb-4">
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow">
+                <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">
                   {editingServiceId ? "Edit Service" : "Add New Service"}
                 </h3>
-                <form onSubmit={handleServiceSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form
+                  onSubmit={handleServiceSubmit}
+                  className="space-y-3 md:space-y-4"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Title
                       </label>
                       <input
                         type="text"
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full p-2 text-sm md:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={newService.title}
                         onChange={(e) =>
                           setNewService({
@@ -614,7 +639,7 @@ const AdminPanel = () => {
                       </label>
                       <input
                         type="number"
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full p-2 text-sm md:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={newService.price}
                         onChange={(e) =>
                           setNewService({
@@ -632,8 +657,8 @@ const AdminPanel = () => {
                       Description
                     </label>
                     <textarea
-                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      rows="3"
+                      className="w-full p-2 text-sm md:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows="2"
                       value={newService.description}
                       onChange={(e) =>
                         setNewService({
@@ -653,7 +678,7 @@ const AdminPanel = () => {
                       <div key={index} className="flex mb-2">
                         <input
                           type="text"
-                          className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="flex-1 p-2 text-sm md:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={feature}
                           onChange={(e) => updateFeature(index, e.target.value)}
                           placeholder={`Feature ${index + 1}`}
@@ -662,7 +687,7 @@ const AdminPanel = () => {
                           <button
                             type="button"
                             onClick={() => removeFeature(index)}
-                            className="ml-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                            className="ml-2 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
                           >
                             Remove
                           </button>
@@ -672,19 +697,19 @@ const AdminPanel = () => {
                     <button
                       type="button"
                       onClick={addFeatureField}
-                      className="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                      className="mt-2 px-3 md:px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm md:text-base"
                     >
                       + Add Feature
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Price Type
                       </label>
                       <select
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full p-2 text-sm md:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={newService.priceType}
                         onChange={(e) =>
                           setNewService({
@@ -702,7 +727,7 @@ const AdminPanel = () => {
                       <input
                         type="checkbox"
                         id="popular"
-                        className="h-5 w-5 text-blue-600 rounded"
+                        className="h-4 w-4 md:h-5 md:w-5 text-blue-600 rounded"
                         checked={newService.popular}
                         onChange={(e) =>
                           setNewService({
@@ -715,15 +740,15 @@ const AdminPanel = () => {
                         htmlFor="popular"
                         className="ml-2 text-sm font-medium text-gray-700"
                       >
-                        Mark as Popular Service
+                        Mark as Popular
                       </label>
                     </div>
                   </div>
 
-                  <div>
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <button
                       type="submit"
-                      className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="bg-blue-600 text-white px-4 md:px-6 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                     >
                       {editingServiceId ? "Update Service" : "Add Service"}
                     </button>
@@ -741,7 +766,7 @@ const AdminPanel = () => {
                             popular: false,
                           });
                         }}
-                        className="ml-4 bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400"
+                        className="bg-gray-300 text-gray-700 px-4 md:px-6 py-2 rounded hover:bg-gray-400 text-sm md:text-base"
                       >
                         Cancel
                       </button>
@@ -751,59 +776,73 @@ const AdminPanel = () => {
               </div>
 
               {/* Services List */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-xl font-semibold mb-4">
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow">
+                <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">
                   All Services ({filteredServices.length})
                 </h3>
                 {filteredServices.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {filteredServices.map((service) => (
                       <div
-                        key={service.id}
-                        className={`border rounded-lg p-5 ${service.popular ? "border-blue-500 shadow-md" : "border-gray-200"}`}
+                        key={service._id}
+                        className={`border rounded-lg p-4 md:p-5 ${service.popular ? "border-blue-500 shadow-md" : "border-gray-200"}`}
                       >
                         {service.popular && (
-                          <div className="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">
+                          <div className="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-2 md:mb-3">
                             Popular
                           </div>
                         )}
-                        <h4 className="text-xl font-bold mb-2">
+                        <h4 className="text-lg md:text-xl font-bold mb-2">
                           {service.title}
                         </h4>
-                        <p className="text-gray-600 mb-4">
+                        <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base line-clamp-2">
                           {service.description}
                         </p>
 
-                        <div className="mb-4">
-                          <h5 className="font-semibold mb-2">Features:</h5>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {service.features.map((feature, index) => (
-                              <li key={index} className="text-gray-700">
-                                {feature}
+                        <div className="mb-3 md:mb-4">
+                          <h5 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
+                            Features:
+                          </h5>
+                          <ul className="list-disc pl-4 md:pl-5 space-y-1">
+                            {service.features
+                              .slice(0, 3)
+                              .map((feature, index) => (
+                                <li
+                                  key={index}
+                                  className="text-gray-700 text-sm"
+                                >
+                                  {feature.length > 50
+                                    ? `${feature.substring(0, 50)}...`
+                                    : feature}
+                                </li>
+                              ))}
+                            {service.features.length > 3 && (
+                              <li className="text-gray-500 text-sm">
+                                +{service.features.length - 3} more features
                               </li>
-                            ))}
+                            )}
                           </ul>
                         </div>
 
-                        <div className="flex justify-between items-center mt-4">
-                          <div>
-                            <span className="text-2xl font-bold">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 md:gap-0 mt-3 md:mt-4">
+                          <div className="mb-2 sm:mb-0">
+                            <span className="text-xl md:text-2xl font-bold">
                               ${service.price}
                             </span>
-                            <span className="text-gray-600 ml-2">
+                            <span className="text-gray-600 ml-1 md:ml-2 text-sm md:text-base">
                               /{service.priceType}
                             </span>
                           </div>
-                          <div className="space-x-2">
+                          <div className="flex gap-2 w-full sm:w-auto">
                             <button
                               onClick={() => handleEditService(service)}
-                              className="px-4 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                              className="px-3 md:px-4 py-1.5 md:py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm md:text-base flex-1 sm:flex-none"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteService(service.id)}
-                              className="px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                              className="px-3 md:px-4 py-1.5 md:py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm md:text-base flex-1 sm:flex-none"
                             >
                               Delete
                             </button>
@@ -813,7 +852,7 @@ const AdminPanel = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 text-sm md:text-base">
                     No services found. Try a different search term or add a new
                     service.
                   </p>

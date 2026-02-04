@@ -14,6 +14,8 @@ import Tokenverify from "./token/tokenverify"
 import Tokenlogin from './token/Tokenlogin'
 import ServicesPage from './pages/Services'
 import Admin from "./pages/admin"
+import Chateapp from './pages/Chateapp'
+import Dasbord from "./pages/Userdasbord"
 
 const App = () => {
   return (
@@ -25,6 +27,8 @@ const App = () => {
         <Route path='/project' element={<Tokenverify children={<Project />} />} />
         <Route path='/services_all' element={<ServicesPage />} />
         <Route path='/admin' element={<Tokenverify isadmin={true} children={<Admin />} />} />
+        <Route path='/services/chate' element={<Chateapp/>} />
+        <Route path='/dasbord' element={<Tokenverify children={<Dasbord/>} />} />
         <Route path='*' element={<M404/>} />
       </Routes>
     </div>
