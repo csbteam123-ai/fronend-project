@@ -3,9 +3,12 @@ import { User, Lock, Eye, EyeOff } from "lucide-react";
 import { usercreate, userlogin } from "../api/user.api";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import {useDispatch} from "react-redux"
+import { setUser } from "../redux/Userslice";
 
 const App = () => {
   const navgit = useNavigate();
+  const dispatch = useDispatch();
   const [isLogin, setIsLogin] = useState(true);
   const [flsemail, setflsemail] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -31,6 +34,7 @@ const App = () => {
 
       if (res.data.token) {
         sessionStorage.setItem("token", res.data.token);
+        dispatch(setUser(res.data.user));
         toast.success("successful login");
         return navgit("/about");
       }
@@ -44,6 +48,7 @@ const App = () => {
       console.log(res);
       if (res.data.token) {
         sessionStorage.setItem("token", res.data.token);
+        dispatch(setUser(res.data.user));
         toast.success("successful accout create");
 
         return navgit("/about");

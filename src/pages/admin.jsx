@@ -5,6 +5,7 @@ import {
   getAllServises,
   updateservises,
 } from "../api/servises.api";
+import { userLogout } from "../api/logout.api";
 
 const AdminPanel = () => {
   // State for users
@@ -162,6 +163,16 @@ const AdminPanel = () => {
       setServices(services.filter((service) => service.id !== id));
     }
   };
+
+
+  const Logout = async () => {
+    const res = await userLogout(token);
+    console.log(res);
+    if (res.data?.sesuss) {
+      sessionStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+  }
 
   // Add feature field to service form
   const addFeatureField = () => {
@@ -369,7 +380,8 @@ const AdminPanel = () => {
               </svg>
             </div>
 
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full md:w-auto">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full md:w-auto"
+            onClick={Logout}>
               Logout
             </button>
           </div>

@@ -1,646 +1,674 @@
-import React, { useState, useEffect } from "react";
+// App.jsx
+import React, { useState } from "react";
+import {
+  UserCircle,
+  MessageCircle,
+  LogOut,
+  Bell,
+  Search,
+  Menu,
+  X,
+  Settings,
+  Star,
+  CheckCircle,
+  Send,
+  MoreVertical,
+  Edit,
+  MapPin,
+  Mail,
+  PhoneCall,
+  Calendar,
+  TrendingUp,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
-const UserDashboard = () => {
-  // User state
-  const [user, setUser] = useState({
-    id: "USR-001",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "👤",
-    role: "Premium User",
-    joinDate: "2024-01-15",
-    status: "Active",
-    location: "Dhaka, Bangladesh",
-    phone: "+880 1234 567890"
-  });
+import { userLogout } from "../api/logout.api";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "../redux/Userslice";
 
-  // Dashboard stats
-  const [stats, setStats] = useState({
-    totalProjects: 12,
-    completedProjects: 8,
-    ongoingProjects: 3,
-    pendingProjects: 1,
-    totalHours: 156,
-    avgRating: 4.7,
-    totalEarnings: "$2,450",
-    tasksCompleted: 42
-  });
-
-  // Recent activities
-  const [activities, setActivities] = useState([
-    { id: 1, action: "Project Completed", details: "E-commerce Website", time: "2 hours ago", icon: "✅" },
-    { id: 2, action: "New Message", details: "From Client: Design Review", time: "5 hours ago", icon: "💬" },
-    { id: 3, action: "Payment Received", details: "$450 for Web Development", time: "1 day ago", icon: "💰" },
-    { id: 4, action: "Task Updated", details: "Added new features", time: "2 days ago", icon: "📝" },
-    { id: 5, action: "Profile Updated", details: "Changed profile picture", time: "3 days ago", icon: "👤" },
-  ]);
-
-  // Projects data
-  const [projects, setProjects] = useState([
-    { id: 1, name: "E-commerce Website", client: "Tech Corp", status: "Completed", progress: 100, deadline: "2024-03-15", budget: "$1,200" },
-    { id: 2, name: "Mobile App UI/UX", client: "Startup Inc", status: "Ongoing", progress: 75, deadline: "2024-03-25", budget: "$800" },
-    { id: 3, name: "SEO Optimization", client: "Digital Agency", status: "Ongoing", progress: 45, deadline: "2024-04-05", budget: "$500" },
-    { id: 4, name: "Logo Design", client: "Brand Studio", status: "Pending", progress: 20, deadline: "2024-03-30", budget: "$300" },
-    { id: 5, name: "Content Writing", client: "Media House", status: "Completed", progress: 100, deadline: "2024-03-10", budget: "$400" },
-  ]);
-
-  // Tasks data
-  const [tasks, setTasks] = useState([
-    { id: 1, title: "Design Homepage", project: "E-commerce", priority: "High", status: "In Progress", dueDate: "Today" },
-    { id: 2, title: "Fix Mobile Bugs", project: "Mobile App", priority: "Medium", status: "Pending", dueDate: "Tomorrow" },
-    { id: 3, title: "Write Blog Post", project: "Content", priority: "Low", status: "Completed", dueDate: "Yesterday" },
-    { id: 4, title: "Client Meeting", project: "All", priority: "High", status: "Pending", dueDate: "Today" },
-    { id: 5, title: "Update Portfolio", project: "Personal", priority: "Medium", status: "In Progress", dueDate: "This Week" },
-  ]);
-
-  // Notifications
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: "New message from client", time: "10 min ago", read: false, type: "message" },
-    { id: 2, message: "Payment received successfully", time: "2 hours ago", read: true, type: "payment" },
-    { id: 3, message: "Project deadline approaching", time: "1 day ago", read: false, type: "deadline" },
-    { id: 4, message: "New project assigned", time: "2 days ago", read: true, type: "project" },
-  ]);
-
-  // State for mobile menu
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
-
-  // Calculate unread notifications
-  const unreadNotifications = notifications.filter(n => !n.read).length;
-
-  // Mark all as read
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
-  };
-
-  // Delete notification
-  const deleteNotification = (id) => {
-    setNotifications(notifications.filter(n => n.id !== id));
-  };
-
-  // Format date
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  };
-
-  // Get status color
-  const getStatusColor = (status) => {
-    switch(status.toLowerCase()) {
-      case 'completed': return 'bg-gray-800 text-white';
-      case 'ongoing': return 'bg-gray-200 text-black';
-      case 'pending': return 'bg-gray-500 text-white';
-      case 'active': return 'bg-green-500 text-white';
-      case 'inactive': return 'bg-red-500 text-white';
-      default: return 'bg-gray-200 text-black';
-    }
-  };
-
-  // Get priority color
-  const getPriorityColor = (priority) => {
-    switch(priority.toLowerCase()) {
-      case 'high': return 'text-red-500';
-      case 'medium': return 'text-yellow-500';
-      case 'low': return 'text-green-500';
-      default: return 'text-gray-400';
-    }
-  };
-
+// Message Component
+const Message = ({ text, time, isOwn, isRead }) => {
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <header className="bg-gray-900 border-b border-gray-800">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center font-bold mr-3">
-                👤
-              </div>
-              <h1 className="text-xl font-bold hidden md:block">User Dashboard</h1>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-gray-800"
-            >
-              {mobileMenuOpen ? '✕' : '☰'}
-            </button>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-6">
-              <div className="relative">
-                <button className="p-2 hover:bg-gray-800 rounded-lg">
-                  <span className="text-xl">🔔</span>
-                  {unreadNotifications > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {unreadNotifications}
-                    </span>
-                  )}
-                </button>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center">
-                  {user.avatar}
-                </div>
-                <div className="hidden lg:block">
-                  <p className="font-medium">{user.name}</p>
-                  <p className="text-gray-400 text-sm">{user.role}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto p-4">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar - Mobile/Tablet */}
-          {mobileMenuOpen && (
-            <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setMobileMenuOpen(false)}>
-              <div className="absolute left-0 top-0 h-full w-64 bg-gray-900 border-r border-gray-800 p-4" onClick={e => e.stopPropagation()}>
-                <div className="mb-8">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
-                      {user.avatar}
-                    </div>
-                    <div>
-                      <p className="font-bold">{user.name}</p>
-                      <p className="text-gray-400 text-sm">{user.role}</p>
-                    </div>
-                  </div>
-                  
-                  {/* Navigation */}
-                  <nav className="space-y-2">
-                    {['overview', 'projects', 'tasks', 'profile', 'settings'].map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => {
-                          setActiveTab(tab);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 rounded-lg flex items-center ${activeTab === tab ? 'bg-white text-black' : 'hover:bg-gray-800'}`}
-                      >
-                        <span className="mr-3">
-                          {tab === 'overview' && '📊'}
-                          {tab === 'projects' && '📁'}
-                          {tab === 'tasks' && '✅'}
-                          {tab === 'profile' && '👤'}
-                          {tab === 'settings' && '⚙️'}
-                        </span>
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                      </button>
-                    ))}
-                  </nav>
-                </div>
-              </div>
-            </div>
+    <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-4`}>
+      <div
+        className={`max-w-xs lg:max-w-md rounded-2xl px-4 py-3 ${isOwn ? "bg-black text-white rounded-br-none" : "bg-gray-100 text-gray-900 rounded-bl-none"}`}
+      >
+        <p className="text-sm">{text}</p>
+        <div
+          className={`flex items-center justify-end gap-1 mt-1 ${isOwn ? "text-gray-300" : "text-gray-500"}`}
+        >
+          <span className="text-xs">{time}</span>
+          {isOwn && (
+            <CheckCircle
+              size={12}
+              className={isRead ? "text-blue-400" : "text-gray-400"}
+            />
           )}
-
-          {/* Sidebar - Desktop */}
-          <div className="hidden lg:block w-64 flex-shrink-0">
-            <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-              <div className="mb-8">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center text-2xl">
-                    {user.avatar}
-                  </div>
-                  <div>
-                    <p className="font-bold text-lg">{user.name}</p>
-                    <p className="text-gray-400">{user.role}</p>
-                    <div className={`inline-block px-2 py-1 rounded-full text-xs mt-1 ${getStatusColor(user.status)}`}>
-                      {user.status}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* User Info */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center">
-                    <span className="text-gray-400 mr-3">📧</span>
-                    <span className="text-sm">{user.email}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-gray-400 mr-3">📱</span>
-                    <span className="text-sm">{user.phone}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-gray-400 mr-3">📍</span>
-                    <span className="text-sm">{user.location}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-gray-400 mr-3">📅</span>
-                    <span className="text-sm">Joined {formatDate(user.joinDate)}</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Navigation */}
-              <nav className="space-y-2">
-                {[
-                  { id: 'overview', icon: '📊', label: 'Overview' },
-                  { id: 'projects', icon: '📁', label: 'Projects' },
-                  { id: 'tasks', icon: '✅', label: 'Tasks' },
-                  { id: 'profile', icon: '👤', label: 'Profile' },
-                  { id: 'settings', icon: '⚙️', label: 'Settings' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full text-left px-4 py-3 rounded-lg flex items-center ${activeTab === item.id ? 'bg-white text-black' : 'hover:bg-gray-800'}`}
-                  >
-                    <span className="mr-3">{item.icon}</span>
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            {/* Notifications Panel */}
-            <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 mt-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold">Notifications</h3>
-                <button 
-                  onClick={markAllAsRead}
-                  className="text-sm text-gray-400 hover:text-white"
-                >
-                  Mark all read
-                </button>
-              </div>
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {notifications.map(notification => (
-                  <div 
-                    key={notification.id} 
-                    className={`p-3 rounded-lg border ${notification.read ? 'border-gray-800' : 'border-gray-700 bg-gray-800'}`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <p className="text-sm">{notification.message}</p>
-                        <p className="text-xs text-gray-400 mt-1">{notification.time}</p>
-                      </div>
-                      <button 
-                        onClick={() => deleteNotification(notification.id)}
-                        className="text-gray-500 hover:text-white ml-2"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1">
-            {/* Top Bar */}
-            <div className="bg-gray-900 rounded-xl border border-gray-800 p-4 mb-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold capitalize">{activeTab}</h2>
-                  <p className="text-gray-400 text-sm">
-                    {activeTab === 'overview' && 'Welcome back! Here is your dashboard overview'}
-                    {activeTab === 'projects' && 'Manage and track your projects'}
-                    {activeTab === 'tasks' && 'Your current tasks and activities'}
-                    {activeTab === 'profile' && 'Manage your profile information'}
-                    {activeTab === 'settings' && 'Configure your account settings'}
-                  </p>
-                </div>
-                
-                <div className="flex items-center space-x-4 mt-4 md:mt-0">
-                  <div className="relative md:hidden">
-                    <button className="p-2 hover:bg-gray-800 rounded-lg">
-                      <span className="text-xl">🔔</span>
-                      {unreadNotifications > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                          {unreadNotifications}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                  <button className="px-4 py-2 bg-white text-black rounded-lg font-medium hover:bg-gray-200">
-                    + New {activeTab === 'projects' ? 'Project' : activeTab === 'tasks' ? 'Task' : 'Item'}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Dashboard Content */}
-            {activeTab === 'overview' && (
-              <div className="space-y-6">
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
-                    { label: 'Total Projects', value: stats.totalProjects, icon: '📁', color: 'bg-gray-800' },
-                    { label: 'Completed', value: stats.completedProjects, icon: '✅', color: 'bg-gray-800' },
-                    { label: 'Ongoing', value: stats.ongoingProjects, icon: '⏳', color: 'bg-gray-800' },
-                    { label: 'Total Earnings', value: stats.totalEarnings, icon: '💰', color: 'bg-gray-800' },
-                  ].map((stat, index) => (
-                    <div key={index} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="text-2xl font-bold">{stat.value}</p>
-                          <p className="text-gray-400 text-sm mt-1">{stat.label}</p>
-                        </div>
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${stat.color}`}>
-                          <span className="text-xl">{stat.icon}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Charts & Projects */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Recent Projects */}
-                  <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="font-bold">Recent Projects</h3>
-                      <button className="text-sm text-gray-400 hover:text-white">
-                        View All
-                      </button>
-                    </div>
-                    <div className="space-y-4">
-                      {projects.slice(0, 3).map(project => (
-                        <div key={project.id} className="flex items-center justify-between p-3 border border-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">{project.name}</p>
-                            <div className="flex items-center space-x-4 mt-1">
-                              <span className="text-sm text-gray-400">{project.client}</span>
-                              <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(project.status)}`}>
-                                {project.status}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold">{project.budget}</p>
-                            <p className="text-sm text-gray-400">Deadline: {formatDate(project.deadline)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Recent Activities */}
-                  <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="font-bold">Recent Activities</h3>
-                      <button className="text-sm text-gray-400 hover:text-white">
-                        View All
-                      </button>
-                    </div>
-                    <div className="space-y-4">
-                      {activities.map(activity => (
-                        <div key={activity.id} className="flex items-start space-x-3 p-3 border border-gray-800 rounded-lg">
-                          <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
-                            {activity.icon}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{activity.action}</p>
-                            <p className="text-gray-400 text-sm mt-1">{activity.details}</p>
-                            <p className="text-gray-500 text-xs mt-2">{activity.time}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-                  <h3 className="font-bold mb-6">Quick Stats</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[
-                      { label: 'Tasks Completed', value: stats.tasksCompleted, icon: '✅' },
-                      { label: 'Total Hours', value: stats.totalHours, icon: '⏱️' },
-                      { label: 'Avg Rating', value: stats.avgRating, icon: '⭐' },
-                      { label: 'Pending Tasks', value: tasks.filter(t => t.status === 'Pending').length, icon: '📝' },
-                    ].map((stat, index) => (
-                      <div key={index} className="text-center p-4 border border-gray-800 rounded-lg">
-                        <div className="text-3xl font-bold mb-2">{stat.value}</div>
-                        <div className="text-gray-400 text-sm">{stat.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'projects' && (
-              <div className="space-y-6">
-                {/* Projects Table */}
-                <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-800">
-                      <thead className="bg-gray-800">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Project</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Client</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Progress</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Deadline</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Budget</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-800">
-                        {projects.map(project => (
-                          <tr key={project.id} className="hover:bg-gray-800">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="font-medium">{project.name}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-gray-400">{project.client}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(project.status)}`}>
-                                {project.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="w-full bg-gray-800 rounded-full h-2">
-                                <div 
-                                  className="bg-white h-2 rounded-full" 
-                                  style={{ width: `${project.progress}%` }}
-                                ></div>
-                              </div>
-                              <div className="text-xs text-gray-400 mt-1">{project.progress}%</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm">{formatDate(project.deadline)}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="font-bold">{project.budget}</div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'tasks' && (
-              <div className="space-y-6">
-                {/* Tasks Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {['Pending', 'In Progress', 'Completed'].map(status => (
-                    <div key={status} className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-                      <h3 className="font-bold mb-6">{status} Tasks</h3>
-                      <div className="space-y-4">
-                        {tasks
-                          .filter(task => task.status === status)
-                          .map(task => (
-                            <div key={task.id} className="p-4 border border-gray-800 rounded-lg">
-                              <div className="flex justify-between items-start mb-2">
-                                <h4 className="font-medium">{task.title}</h4>
-                                <span className={`text-xs font-bold ${getPriorityColor(task.priority)}`}>
-                                  {task.priority}
-                                </span>
-                              </div>
-                              <div className="flex justify-between items-center mt-4">
-                                <span className="text-sm text-gray-400">{task.project}</span>
-                                <span className="text-sm text-gray-400">{task.dueDate}</span>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'profile' && (
-              <div className="space-y-6">
-                <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-                  <h3 className="font-bold mb-6">Profile Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Full Name</label>
-                        <input 
-                          type="text" 
-                          value={user.name}
-                          onChange={(e) => setUser({...user, name: e.target.value})}
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Email</label>
-                        <input 
-                          type="email" 
-                          value={user.email}
-                          onChange={(e) => setUser({...user, email: e.target.value})}
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Phone</label>
-                        <input 
-                          type="tel" 
-                          value={user.phone}
-                          onChange={(e) => setUser({...user, phone: e.target.value})}
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Location</label>
-                        <input 
-                          type="text" 
-                          value={user.location}
-                          onChange={(e) => setUser({...user, location: e.target.value})}
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Role</label>
-                        <select 
-                          value={user.role}
-                          onChange={(e) => setUser({...user, role: e.target.value})}
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3"
-                        >
-                          <option>Basic User</option>
-                          <option>Premium User</option>
-                          <option>Pro User</option>
-                          <option>Admin</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Status</label>
-                        <select 
-                          value={user.status}
-                          onChange={(e) => setUser({...user, status: e.target.value})}
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3"
-                        >
-                          <option>Active</option>
-                          <option>Inactive</option>
-                          <option>Busy</option>
-                          <option>Away</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-4 mt-8">
-                    <button className="px-6 py-3 border border-gray-700 rounded-lg hover:bg-gray-800">
-                      Cancel
-                    </button>
-                    <button className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-gray-200">
-                      Save Changes
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'settings' && (
-              <div className="space-y-6">
-                <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-                  <h3 className="font-bold mb-6">Account Settings</h3>
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="font-medium mb-4">Privacy Settings</h4>
-                      <div className="space-y-3">
-                        <label className="flex items-center">
-                          <input type="checkbox" className="mr-3" defaultChecked />
-                          <span>Show profile to other users</span>
-                        </label>
-                        <label className="flex items-center">
-                          <input type="checkbox" className="mr-3" defaultChecked />
-                          <span>Allow notifications</span>
-                        </label>
-                        <label className="flex items-center">
-                          <input type="checkbox" className="mr-3" />
-                          <span>Email notifications for new messages</span>
-                        </label>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium mb-4">Security</h4>
-                      <button className="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-800">
-                        Change Password
-                      </button>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium mb-4">Data & Privacy</h4>
-                      <button className="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-800">
-                        Download Data
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default UserDashboard;
+// Chat Contact Component
+const ChatContact = ({ name, lastMessage, time, unread, isOnline }) => {
+  return (
+    <div className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+      <div className="relative">
+        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+          <UserCircle size={20} className="text-gray-600" />
+        </div>
+        {isOnline && (
+          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-center">
+          <h4 className="font-medium text-gray-900 truncate">{name}</h4>
+          <span className="text-xs text-gray-500">{time}</span>
+        </div>
+        <p className="text-sm text-gray-600 truncate">{lastMessage}</p>
+      </div>
+      {unread > 0 && (
+        <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+          {unread}
+        </span>
+      )}
+    </div>
+  );
+};
+
+// Profile Stats Component
+const ProfileStat = ({ label, value, icon }) => {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-gray-100 rounded-lg">{icon}</div>
+        <div>
+          <p className="text-sm text-gray-600">{label}</p>
+          <p className="text-xl font-bold text-gray-900">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main App Component
+const App = () => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
+  console.log(user);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
+  const [messageInput, setMessageInput] = useState("");
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [activeChat, setActiveChat] = useState(1);
+
+  // Profile data
+  const profileData = {
+    name: user?.name || "John Smith",
+    email: user?.email || "exm@gmail.com",
+    phone: "+1 (555) 123-4567",
+    location: "New York, USA",
+    memberSince: "March 2023",
+    serviceRating: "4.8",
+    completedServices: "24",
+    responseTime: "2.4h",
+    satisfactionRate: "96%",
+  };
+
+  // Chat messages for active chat
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      text: "Hi John! How is the design project going?",
+      time: "10:30 AM",
+      isOwn: false,
+      isRead: true,
+    },
+    {
+      id: 2,
+      text: "Going well! I just finished the mockups.",
+      time: "10:32 AM",
+      isOwn: true,
+      isRead: true,
+    },
+    {
+      id: 3,
+      text: "Great! Can you share them with me?",
+      time: "10:33 AM",
+      isOwn: false,
+      isRead: true,
+    },
+    {
+      id: 4,
+      text: "Sure, I'll upload them in the next hour.",
+      time: "10:35 AM",
+      isOwn: true,
+      isRead: true,
+    },
+    {
+      id: 5,
+      text: "Perfect! Looking forward to seeing them.",
+      time: "10:36 AM",
+      isOwn: false,
+      isRead: true,
+    },
+  ]);
+
+  // Chat contacts
+  const chatContacts = [
+    {
+      id: 1,
+      name: "Sarah Johnson",
+      lastMessage: "Can we schedule a call tomorrow?",
+      time: "10:45",
+      unread: 2,
+      isOnline: true,
+    },
+    {
+      id: 2,
+      name: "Mike Chen",
+      lastMessage: "Thanks for the quick response!",
+      time: "09:20",
+      unread: 0,
+      isOnline: true,
+    },
+    {
+      id: 3,
+      name: "Design Team",
+      lastMessage: "Meeting notes attached",
+      time: "Yesterday",
+      unread: 0,
+      isOnline: false,
+    },
+    {
+      id: 4,
+      name: "Support Team",
+      lastMessage: "Your issue has been resolved",
+      time: "Mar 12",
+      unread: 0,
+      isOnline: false,
+    },
+  ];
+
+  // Profile stats
+  const profileStats = [
+    { label: "Service Rating", value: "4.8", icon: <Star /> },
+    { label: "Response Time", value: "2.4h", icon: <CheckCircle /> },
+    { label: "Satisfaction Rate", value: "96%", icon: <TrendingUp /> },
+    { label: "Member Since", value: "2023", icon: <Calendar /> },
+  ];
+
+  // Handle sending message
+  const handleSendMessage = () => {
+    if (messageInput.trim()) {
+      const newMessage = {
+        id: messages.length + 1,
+        text: messageInput,
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        isOwn: true,
+        isRead: false,
+      };
+      setMessages([...messages, newMessage]);
+      setMessageInput("");
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = async () => {
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      try {
+        const res = await userLogout(token);
+        console.log(token);
+        console.log(res);
+        if (res.data?.sesuss) {
+          sessionStorage.removeItem("token");
+          dispatch(setUser(null));
+          window.location.href = "/login";
+        }
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
+    setShowLogoutConfirm(false);
+  };
+
+  // Handle Enter key press for sending message
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-gray-100 rounded-lg">
+                <LogOut className="text-gray-700" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Confirm Logout
+              </h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to logout?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="flex-1 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800"
+              >
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 bg-black text-white z-40">
+        <div className="flex items-center justify-between h-16 px-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden"
+            >
+              {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+            <h1 className="text-xl font-bold">USER DASHBOARD</h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden md:block relative">
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={20}
+              />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="bg-gray-900 text-white rounded-lg py-2 pl-10 pr-4 w-48 focus:outline-none"
+              />
+            </div>
+
+            <button className="relative">
+              <Bell size={20} />
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-xs rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Simple Sidebar - Only Profile and Chat */}
+      <aside
+        className={`
+        fixed top-16 left-0 bottom-0 w-64 bg-white border-r border-gray-200 
+        transform transition-transform duration-300 ease-in-out z-30
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
+      `}
+      >
+        {/* User Info */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex flex-col items-center text-center">
+            <div className="relative mb-4">
+              <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center">
+                <UserCircle size={40} className="text-gray-600" />
+              </div>
+              <button className="absolute bottom-0 right-0 p-2 bg-black text-white rounded-full hover:bg-gray-800">
+                <Edit size={16} />
+              </button>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">
+              {profileData.name}
+            </h2>
+            <p className="text-gray-600 text-sm mt-1">Service Client</p>
+          </div>
+        </div>
+
+        {/* Navigation - Only 2 Options */}
+        <nav className="p-4">
+          <div className="space-y-2">
+            <button
+              onClick={() => setActiveTab("profile")}
+              className={`
+                w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
+                ${
+                  activeTab === "profile"
+                    ? "bg-black text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }
+              `}
+            >
+              <UserCircle size={20} />
+              My Profile
+            </button>
+
+            <button
+              onClick={() => setActiveTab("chat")}
+              className={`
+                w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
+                ${
+                  activeTab === "chat"
+                    ? "bg-black text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }
+              `}
+            >
+              <MessageCircle size={20} />
+              Messages
+              <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                4
+              </span>
+            </button>
+          </div>
+
+          {/* Divider */}
+          <div className="my-6 border-t border-gray-200"></div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <LogOut size={20} />
+            Logout
+          </button>
+        </nav>
+      </aside>
+
+      {/* Overlay for mobile sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Main Content */}
+      <main className="pt-16 lg:pl-64">
+        {/* Profile Tab */}
+        {activeTab === "profile" && (
+          <div className="p-4 md:p-6">
+            {/* Profile Header */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">My Profile</h2>
+              <p className="text-gray-600 mt-1">
+                Manage your personal information
+              </p>
+            </div>
+
+            {/* Profile Card */}
+            <div className="bg-white rounded-xl border border-gray-200 mb-6">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Personal Information
+                  </h3>
+                  <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    <Edit size={16} />
+                    Edit Profile
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <Mail className="text-gray-400" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-600">Email Address</p>
+                        <p className="font-medium text-gray-900">
+                          {profileData.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <PhoneCall className="text-gray-400" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-600">Phone Number</p>
+                        <p className="font-medium text-gray-900">
+                          {profileData.phone}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <MapPin className="text-gray-400" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-600">Location</p>
+                        <p className="font-medium text-gray-900">
+                          {profileData.location}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Calendar className="text-gray-400" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-600">Member Since</p>
+                        <p className="font-medium text-gray-900">
+                          {profileData.memberSince}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Profile Stats */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Profile Statistics
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {profileStats.map((stat, index) => (
+                  <ProfileStat key={index} {...stat} />
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="mt-8 bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Quick Actions
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-100 rounded-lg">
+                      <Settings size={20} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        Account Settings
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Update preferences
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-100 rounded-lg">
+                      <Bell size={20} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Notifications</p>
+                      <p className="text-sm text-gray-600">Manage alerts</p>
+                    </div>
+                  </div>
+                </button>
+
+                <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-100 rounded-lg">
+                      <MessageCircle size={20} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        Go to Messages
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Check conversations
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Chat Tab */}
+        {activeTab === "chat" && (
+          <div className="h-[calc(100vh-4rem)] flex flex-col">
+            {/* Chat Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setActiveChat(null)}
+                  className="lg:hidden mr-2"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <div className="relative">
+                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                    <UserCircle size={20} className="text-gray-600" />
+                  </div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Sarah Johnson</h3>
+                  <p className="text-sm text-green-600">Online</p>
+                </div>
+              </div>
+              <button className="p-2 hover:bg-gray-100 rounded-lg">
+                <MoreVertical size={20} className="text-gray-600" />
+              </button>
+            </div>
+
+            {/* Chat Content */}
+            <div className="flex flex-1 overflow-hidden">
+              {/* Chat Contacts Sidebar */}
+              <div
+                className={`${activeChat ? "hidden lg:block" : "block"} w-full lg:w-80 border-r border-gray-200 bg-white overflow-y-auto`}
+              >
+                <div className="p-4 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-4">Messages</h4>
+                  <div className="relative">
+                    <Search
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={18}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search conversations..."
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-2">
+                  {chatContacts.map((contact) => (
+                    <div
+                      key={contact.id}
+                      onClick={() => {
+                        setActiveChat(contact.id);
+                        if (window.innerWidth < 1024) {
+                          // On mobile, hide contacts sidebar when selecting a chat
+                          // You could add logic here to switch views
+                        }
+                      }}
+                    >
+                      <ChatContact {...contact} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chat Messages Area */}
+              <div
+                className={`${!activeChat ? "hidden lg:flex" : "flex"} flex-1 flex-col`}
+              >
+                {/* Messages Container */}
+                <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                  <div className="max-w-4xl mx-auto">
+                    {messages.map((message) => (
+                      <Message key={message.id} {...message} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Simple Message Input - No extra buttons */}
+                <div className="border-t border-gray-200 bg-white p-4">
+                  <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+                          <input
+                            type="text"
+                            value={messageInput}
+                            onChange={(e) => setMessageInput(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Type your message..."
+                            className="flex-1 px-4 py-3 focus:outline-none"
+                          />
+                          <button
+                            onClick={handleSendMessage}
+                            disabled={!messageInput.trim()}
+                            className={`px-6 ${messageInput.trim() ? "bg-black hover:bg-gray-800" : "bg-gray-300 cursor-not-allowed"} text-white transition-colors`}
+                          >
+                            <Send size={20} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Simple Footer */}
+      <footer className="lg:pl-64 p-4 border-t border-gray-200 bg-white">
+        <div className="text-center text-gray-500 text-sm">
+          Simple Dashboard • {new Date().getFullYear()}
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default App;
