@@ -1,5 +1,5 @@
 // App.jsx
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   UserCircle,
   MessageCircle,
@@ -26,6 +26,7 @@ import {
 import { userLogout } from "../api/logout.api";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser } from "../redux/Userslice";
+import {user_find} from '../api/user.deta.find';
 
 // Message Component
 const Message = ({ text, time, isOwn, isRead }) => {
@@ -104,6 +105,28 @@ const App = () => {
   const [messageInput, setMessageInput] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [activeChat, setActiveChat] = useState(1);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    const fetchUserData = async () => {
+      if (token) {
+        try {
+          const res = await user_find(token);
+          if (res.data?.bolien) {
+            dispatch(setUser(res.data.data));
+          } else {
+            dispatch(setUser(null));
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          dispatch(setUser(null));
+        }
+      } else {
+        dispatch(setUser(null));
+      }
+    };
+    fetchUserData();
+  },[])
 
   // Profile data
   const profileData = {

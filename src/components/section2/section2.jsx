@@ -19,7 +19,7 @@ const PremiumTeamSection = () => {
       role: "Lead Web Developer",
       expertise: "Full Stack Development",
       tagline: "Crafting Digital Excellence",
-      image: "https://i.pinimg.com/736x/ff/a9/d7/ffa9d7bbf64e91260778fe572018637a.jpg",
+      image: "https://i.ibb.co.com/JW4PRFSf/619514153-867220032790447-3606203025685460232-n.jpg",
       description: "Architecting scalable web solutions with cutting-edge technologies. Passionate about clean code and exceptional user experiences.",
       icon: <Code className="h-6 w-6" />,
       iconColor: "text-blue-500",
@@ -126,8 +126,8 @@ const PremiumTeamSection = () => {
   return (
     <div className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-950 via-black to-gray-900">
       {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
+      <div className="">
+        <div className=" -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
       </div>
 

@@ -6,10 +6,34 @@ import {
   ArrowRight, Menu, X, Filter
 } from 'lucide-react';
 import Navbar from '../components/section1/Navbar';
+import { useEffect } from 'react';
+import {user_find} from '../api/user.deta.find';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../redux/Userslice';
 
 const Project = () => {
+  const dispatch = useDispatch()
   const [filter, setFilter] = useState('all');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    const fetchData = async () => {
+      try {
+        const response = await user_find(token);
+        console.log(response.data);
+        if(response.data?.bolien){
+          dispatch(setUser(response.data.data));
+          console.log("data save sessucc")
+        } else {
+          console.log("User not found or token invalid.");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchData();
+
+  },[]);
 
   // Project data
   const projects = [

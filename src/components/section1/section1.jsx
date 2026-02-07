@@ -4,7 +4,7 @@ import Laftcontent from './laftcontent'
 import Rightcontent from './rightcontent'
 
 
-const section1 = () => {
+const Section1 = () => {
   return (
     <div className='h-screen w-full  text-white font-medium py-5 px-5 overflow-hidden max-[639px]:h-auto '>
         <Navbar />
@@ -16,4 +16,4 @@ const section1 = () => {
   )
 }
 
-export default section1
+export default Section1

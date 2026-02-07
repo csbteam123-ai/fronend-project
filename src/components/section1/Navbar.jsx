@@ -29,7 +29,7 @@ const Navbar = ({ className = "", buttonbg = "", mobile_btn_col = "" }) => {
   }, []);
 
   return (
-    <div className="h-1/12 w-full py-1 px-4 flex items-center justify-between d22335">
+    <div className="h-1/12 w-full py-1 px-4 flex items-center justify-between d22335 p-5">
       <div className="w-full flex justify-between items-center">
         <Link to="/">
           <button
