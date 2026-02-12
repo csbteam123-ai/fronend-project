@@ -1,5 +1,5 @@
 // App.jsx
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   UserCircle,
   MessageCircle,
@@ -26,7 +26,10 @@ import {
 import { userLogout } from "../api/logout.api";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser } from "../redux/Userslice";
-import {user_find} from '../api/user.deta.find';
+import { user_find } from "../api/user.deta.find";
+
+import { message_user_find } from "../api/message.api";
+import { message_conv } from "../api/mess.conv.api";
 
 // Message Component
 const Message = ({ text, time, isOwn, isRead }) => {
@@ -99,15 +102,44 @@ const ProfileStat = ({ label, value, icon }) => {
 const App = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
-  console.log(user);
+  const member = useSelector((state) => state.user.admin_mamber);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const [messageInput, setMessageInput] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [messagelist, setmessagelist] = useState([]);
   const [activeChat, setActiveChat] = useState(1);
 
+  const token = sessionStorage.getItem("token");
+  //serch inpue handel
+
+  const [serch, setserch] = useState("");
+
+  const serchhandel = (e) => {
+    const v = e.target.value;
+    setserch(v);
+    fetchMessages(v);
+  };
+
+  const fetchMessages = async (p) => {
+    if (token) {
+      try {
+        const res = await message_user_find(token, p);
+        if (res.data) {
+          setmessagelist(res.data);
+        }
+      } catch (error) {
+        console.log("server error:" + error);
+      }
+    }
+  };
+  const create_conv = async (id) => {
+    const member = await message_conv(token,user.id,id)
+    console.log(user)
+    console.log(member)
+  };
+
   useEffect(() => {
-    const token = sessionStorage.getItem("token");
     const fetchUserData = async () => {
       if (token) {
         try {
@@ -125,8 +157,10 @@ const App = () => {
         dispatch(setUser(null));
       }
     };
+
+    fetchMessages();
     fetchUserData();
-  },[])
+  }, []);
 
   // Profile data
   const profileData = {
@@ -182,38 +216,34 @@ const App = () => {
 
   // Chat contacts
   const chatContacts = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      lastMessage: "Can we schedule a call tomorrow?",
-      time: "10:45",
-      unread: 2,
-      isOnline: true,
-    },
-    {
-      id: 2,
-      name: "Mike Chen",
-      lastMessage: "Thanks for the quick response!",
-      time: "09:20",
-      unread: 0,
-      isOnline: true,
-    },
-    {
-      id: 3,
-      name: "Design Team",
-      lastMessage: "Meeting notes attached",
-      time: "Yesterday",
-      unread: 0,
-      isOnline: false,
-    },
-    {
-      id: 4,
-      name: "Support Team",
-      lastMessage: "Your issue has been resolved",
-      time: "Mar 12",
-      unread: 0,
-      isOnline: false,
-    },
+    // {
+    //   id: 1,
+    //   name: "Sarah Johnson",
+    //   time: "10:45",
+    //   unread: 2,
+    //   isOnline: true,
+    // },
+    // {
+    //   id: 2,
+    //   name: "Mike Chen",
+    //   time: "09:20",
+    //   unread: 0,
+    //   isOnline: true,
+    // },
+    // {
+    //   id: 3,
+    //   name: "Design Team",
+    //   time: "Yesterday",
+    //   unread: 0,
+    //   isOnline: false,
+    // },
+    // {
+    //   id: 4,
+    //   name: "Support Team",
+    //   time: "Mar 12",
+    //   unread: 0,
+    //   isOnline: false,
+    // },
   ];
 
   // Profile stats
@@ -617,25 +647,45 @@ const App = () => {
                       type="text"
                       placeholder="Search conversations..."
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                      value={serch}
+                      onChange={serchhandel}
                     />
                   </div>
                 </div>
 
                 <div className="p-2">
-                  {chatContacts.map((contact) => (
-                    <div
-                      key={contact.id}
-                      onClick={() => {
-                        setActiveChat(contact.id);
-                        if (window.innerWidth < 1024) {
-                          // On mobile, hide contacts sidebar when selecting a chat
-                          // You could add logic here to switch views
-                        }
-                      }}
-                    >
-                      <ChatContact {...contact} />
-                    </div>
-                  ))}
+                  {!serch &&
+                    member.map((contact) => (
+                      <div
+                        key={contact._id}
+                        onClick={() => {
+                          setActiveChat(contact.id);
+                          if (window.innerWidth < 1024) {
+                            // On mobile, hide contacts sidebar when selecting a chat
+                            // You could add logic here to switch views
+                          }
+                        }}
+                      >
+                        <ChatContact {...contact} />
+                      </div>
+                    ))}
+                  {serch &&
+                    messagelist.map((contact) => (
+                      <div
+                        key={contact.id}
+                        onClick={() => {
+                          setActiveChat(contact.id);
+                          if (window.innerWidth < 1024) {
+                            // On mobile, hide contacts sidebar when selecting a chat
+                            // You could add logic here to switch views
+                          }
+                          console.log(contact._id)
+                          create_conv(contact._id)
+                        }}
+                      >
+                        <ChatContact {...contact} />
+                      </div>
+                    ))}
                 </div>
               </div>
 

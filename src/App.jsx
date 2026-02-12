@@ -16,8 +16,12 @@ import ServicesPage from './pages/Services'
 import Admin from "./pages/admin"
 import Chateapp from './pages/Chateapp'
 import Dasbord from "./pages/Userdasbord"
+import ReduxSave from './redux/redux.save'
+import Massageredux from './customhooks/massage.redux'
 
 const App = () => {
+  ReduxSave()
+  Massageredux()
   return (
     <div>
       <Routes>
